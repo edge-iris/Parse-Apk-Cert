@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>p7b test</title>
+  <meta charset="UTF-8">
+  <script src="../int10.js"></script>
+  <script src="../oids.js"></script>
+  <script src="../base64.js"></script>
+  <script src="../hex.js"></script>
+  <script src="../asn1.js"></script>
+  <script src="../BaseTool.js"></script>
+  <script src="../X509CertificateTool.js"></script>
+  <script src="../PKCS7Tool.js"></script>
+
+  <script>
+    var p7bBase64 = "MIIDhgYJKoZIhvcNAQcCoIIDdzCCA3MCAQExDzANBglghkgBZQMEAgEFADALBgkqhkiG9w0BBwGgggI5MIICNTCCAZ6gAwIBAgIES9EMcTANBgkqhkiG9w0BAQUFADBfMQswCQYDVQQGEwJVUzELMAkGA1UECBMCSUwxEDAOBgNVBAcTB0NoaWNhZ28xGzAZBgNVBAoTElRlc2xhQ29pbCBTb2Z0d2FyZTEUMBIGA1UEAxMLS2V2aW4gQmFycnkwHhcNMTAwNDIzMDI1NjQ5WhcNMzUwNDE3MDI1NjQ5WjBfMQswCQYDVQQGEwJVUzELMAkGA1UECBMCSUwxEDAOBgNVBAcTB0NoaWNhZ28xGzAZBgNVBAoTElRlc2xhQ29pbCBTb2Z0d2FyZTEUMBIGA1UEAxMLS2V2aW4gQmFycnkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAIcoG472dMLK+uiEOELZRnNLvJsznp7shzuXO8ryEQL7idUvxsTPOMOPYailhMaHtMgiTx9iRHksLDokx7iZF561mtZizOapOX1/AK7lm9JYafsc/px/uRoymJh2o8nw4zvYUOt0nB+Hy8khLrMFeZ0bmJ+0KMgDbYKnsXwIVciLAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEACchCJNcHvQaFXu8mtvb4ArnQNVkPAV6GkPfu34wNOFfjOeW1V+rRe8RCpapQmf1YBzgQvTOKPChk5sQMMWrFDiPd69CcVOGFgqW4sUwfCBMu92X8NqYDB2ZxdF8j/IrQi+q+H8OP8ONQf3pAFmP8cozbm08vHIAGkS1BC3ltmfAxggERMIIBDQIBATBnMF8xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJJTDEQMA4GA1UEBxMHQ2hpY2FnbzEbMBkGA1UEChMSVGVzbGFDb2lsIFNvZnR3YXJlMRQwEgYDVQQDEwtLZXZpbiBCYXJyeQIES9EMcTANBglghkgBZQMEAgEFADANBgkqhkiG9w0BAQEFAASBgDPV2he8hqlAn2chmKCAGwrC6XbaMH3XcuY6sFXA8oFGtNZSJeJ3eyuDb9pRxU9b/lc1IuDl4v5MxEmvhaoAxy8Mo+VqE0oiEkLVgpo02ZA6I9QRyEhB3GLdmtB6NrTovBHXmWwyhz8y26T8VPvqPPdSff7uQk3xIYfq7/O9wFFD"
+
+    function setP7B () {
+      document.getElementById( "p7b" ).value = p7bBase64
+    }
+
+
+
+
+    function LoadingAPK () {
+
+      const input = document.createElement( 'input' )
+      input.type = 'file'
+      input.accept = ".apk"
+      input.addEventListener( 'change', async ( e ) => {
+        if ( input.files?.length === 0 ) return
+        const file = input.files[ 0 ]
+      } )
+      input.click()
+    }
+
+
+    function read () {
+      setP7B()
+      var cer = document.getElementById( "p7b" ).value
+      if ( cer == "" ) {
+        alert( "证书链不能为空" )
+        return
+      }
+      var p7b = PKCS7Tool.loadPKCS7( cer )
+
+      console.log( 'p7b>>>', p7b )
+      var certificateChain = p7b.getCertificateChain()
+
+
+      console.log( 'certificateChain>>>>>>>>>>>', certificateChain )
+
+      var s = ""
+      s += "-----------证书链getCertificateChain-----------<br>"
+      for ( var i = 0; i < certificateChain.length; i++ ) {
+        s += "-----------证书" + i + "-----------<br>"
+        s += "SN:" + certificateChain[ i ].getSerial() + "<br>"
+        s += "DN:" + certificateChain[ i ].getSubject() + "<br>"
+        s += "有效期:" + new Date( certificateChain[ i ].getNotBefore() ) + "-" + new Date( certificateChain[ i ].getNotAfter() ) + "<br>"
+        s += "颁发者:" + certificateChain[ i ].getIssuer() + "<br>"
+        s += "签名摘要算法:" + certificateChain[ i ].getAlgorithm() + "<br>"
+        s += "cerBase64:" + certificateChain[ i ].getBase64() + "<br>"
+      }
+      s += "-----------证书getCertificate-----------<br>"
+      var cert = p7b.getCertificate()
+
+      // console.log( 'cert> sign', cert.getSign() )
+      s += "SN:" + cert.getSerial() + "<br>"
+      s += "DN:" + cert.getSubject() + "<br>"
+      s += "有效期:" + new Date( cert.getNotBefore() ) + "-" + new Date( cert.getNotAfter() ) + "<br>"
+      s += "颁发者:" + cert.getIssuer() + "<br>"
+      s += "签名摘要算法:" + cert.getAlgorithm() + "<br>"
+      s += "cerBase64:" + cert.getBase64() + "<br>"
+
+
+      // const { asn1: { stream: { enc: ecode } } } = cert
+      const ecode = certificateChain[ 0 ].getSign()
+
+      var hexString = ""
+      for ( var i = 0; i < ecode.length; i++ ) {
+        if ( ( ecode[ i ] & 0xff ) < 0x10 ) {// 0~F前面不零
+          hexString += ( "0" )
+        }
+        hexString += ( ( 0xFF & ecode[ i ] ).toString( 16 ) )
+        // hexString.append( ":" )
+      }
+
+
+
+
+      console.log( 'cert=======>', hexString )
+      console.log( '30819f=======>', hex.decode( '30819f' ) )
+
+      document.getElementById( "text" ).innerHTML = s
+    }
+  </script>
+</head>
+
+<body>
+  PKCS#7B base64证书链<br>
+  <button onclick="setP7B()">加载p7b</button><br>
+
+  <textarea id="p7b" style="height: 300px;width: 300px;">
+             </textarea><br><button onclick="read()">读取</button><br>
+  <strong id="text"></strong><br>
+
+
+
+
+  <button onclick="LoadingAPK()">加载APK</button><br>
+
+</body>
+
+</html>

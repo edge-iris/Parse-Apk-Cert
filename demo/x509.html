@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>x509 test</title>
+  <meta charset="UTF-8">
+  <script src="../int10.js"></script>
+  <script src="../oids.js"></script>
+  <script src="../base64.js"></script>
+  <script src="../hex.js"></script>
+  <script src="../asn1.js"></script>
+  <script src="../BaseTool.js"></script>
+  <script src="../X509CertificateTool.js"></script>
+
+
+  <script>
+    var SM2cer = "MIIBeTCCASCgAwIBAgIGAXimRuuIMAoGCCqBHM9VAYN1MBwxCzAJBgNVBAYTAkNOMQ0wCwYDVQQDDARsaWNoMB4XDTIwMTIzMTE2MDAwMFoXDTMwMTIzMTE1NTk1OVowHjELMAkGA1UEBhMCQ04xDzANBgNVBAMMBkdNVEVTVDBZMBMGByqGSM49AgEGCCqBHM9VAYItA0IABPeTHUX6jjGoEALjHqjnTAYszoLQvwkvqcoB08WShIKfcAwCBCySZdsaYvTer/ue38vOjhbeEmqGnzFTLsgSZR2jTDBKMAsGA1UdDwQEAwIGwDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwQwCQYDVR0TBAIwADARBglghkgBhvhCAQEEBAMCB4AwCgYIKoEcz1UBg3UDRwAwRAIgZO5yetVVhWexGmnFK03TlP5a6z50+j2KqJBz7/ltLyMCIFwa2q9C12K90+SGD2hhMwr2KgW+NCalKkCHI/olQWKI"
+    var RSAcer = "MIICNTCCAZ6gAwIBAgIES9EMcTANBgkqhkiG9w0BAQUFADBfMQswCQYDVQQGEwJVUzELMAkGA1UECBMCSUwxEDAOBgNVBAcTB0NoaWNhZ28xGzAZBgNVBAoTElRlc2xhQ29pbCBTb2Z0d2FyZTEUMBIGA1UEAxMLS2V2aW4gQmFycnkwHhcNMTAwNDIzMDI1NjQ5WhcNMzUwNDE3MDI1NjQ5WjBfMQswCQYDVQQGEwJVUzELMAkGA1UECBMCSUwxEDAOBgNVBAcTB0NoaWNhZ28xGzAZBgNVBAoTElRlc2xhQ29pbCBTb2Z0d2FyZTEUMBIGA1UEAxMLS2V2aW4gQmFycnkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAIcoG472dMLK+uiEOELZRnNLvJsznp7shzuXO8ryEQL7idUvxsTPOMOPYailhMaHtMgiTx9iRHksLDokx7iZF561mtZizOapOX1/AK7lm9JYafsc/px/uRoymJh2o8nw4zvYUOt0nB+Hy8khLrMFeZ0bmJ+0KMgDbYKnsXwIVciLAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEACchCJNcHvQaFXu8mtvb4ArnQNVkPAV6GkPfu34wNOFfjOeW1V+rRe8RCpapQmf1YBzgQvTOKPChk5sQMMWrFDiPd69CcVOGFgqW4sUwfCBMu92X8NqYDB2ZxdF8j/IrQi+q+H8OP8ONQf3pAFmP8cozbm08vHIAGkS1BC3ltmfA="
+    function setSM2 () {
+      document.getElementById( "cer" ).value = SM2cer
+    }
+    function setRSA () {
+      document.getElementById( "cer" ).value = RSAcer
+    }
+    function read () {
+      setRSA()
+      var cer = document.getElementById( "cer" ).value
+      if ( cer == "" ) {
+        alert( "证书不能为空" )
+        return
+      }
+      var cert = X509CertificateTool.loadX509Certificate( cer )
+
+      const ecode = cert.getSign()
+      // console.log( 'ecode>>', ecode )
+      var hexString = ""
+      for ( var i = 0; i < ecode.length; i++ ) {
+        if ( ( ecode[ i ] & 0xff ) < 0x10 ) {// 0~F前面不零
+          hexString += ( "0" )
+        }
+        hexString += ( ( 0xFF & ecode[ i ] ).toString( 16 ) )
+        // hexString.append( ":" )
+      }
+      console.log( 'hexString=>', hexString )
+      console.log( 'Hex=>', hex.encode( ecode ) )
+
+      console.log( 'cert>>', cert )
+      document.getElementById( "sn" ).innerHTML = cert.getSerial()
+      document.getElementById( "dn" ).innerHTML = cert.getSubject()
+      document.getElementById( "time" ).innerHTML = new Date( cert.getNotBefore() ) + "-" + new Date( cert.getNotAfter() )
+      document.getElementById( "issuer" ).innerHTML = cert.getIssuer()
+      document.getElementById( "algorithm" ).innerHTML = cert.getAlgorithm()
+    }
+  </script>
+</head>
+
+<body>
+  x509 base64证书 <br>
+  <button onclick="setSM2()">加载SM2 CER</button>
+  <button onclick="setRSA()">加载RSA CER</button><br>
+  <textarea id="cer" style="height: 300px;width: 300px;">
+             </textarea><br><button onclick="read()">读取</button><br>
+  SN:<strong id="sn"></strong><br>
+  DN:<strong id="dn"></strong><br>
+  有效期:<strong id="time"></strong><br>
+  颁发者:<strong id="issuer"></strong><br>
+  签名摘要算法:<strong id="algorithm"></strong>
+</body>
+
+</html>
